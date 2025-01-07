@@ -1,0 +1,14 @@
+name: Castigo
+author: DrNutella
+version: 1.0
+main: de.drnutella.castigo.Castigo
+
+commands:
+  ban:
+  mute:
+  mutetemplates:
+  bantemplates:
+  unmute:
+  unban:
+  customban:
+  custommute:

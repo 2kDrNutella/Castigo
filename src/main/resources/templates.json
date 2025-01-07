@@ -1,0 +1,23 @@
+{
+  "BanTemplates": [
+    {
+      "HACKING": "30d, 45d, perma",
+      "TROLLING": "1d (14), 30d [3], perma",
+      "TEAMING": "12h (2), 45d (10), perma",
+      "BUGUSING": "30d (3), perma",
+      "SKIN": "7d (3), 60d, 75d, perma"
+    }
+  ],
+  "MuteTemplates": [
+    {
+      "BELEIDIGUNG": "30d, 45d, perma",
+      "VUCV": "1d (14), 30d [3], perma",
+      "RV": "12h (2), 45d (10), perma",
+      "MU": "30d (3), perma",
+      "VVH": "75d, perma"
+    }
+  ]
+}
+
+
+

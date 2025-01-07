@@ -1,0 +1,8 @@
+{
+  "Host": "Castigo",
+  "Port": "3306",
+  "Database": "Punishment",
+  "Username": "root",
+  "Password": "password",
+  "Tables-Created": false
+}
