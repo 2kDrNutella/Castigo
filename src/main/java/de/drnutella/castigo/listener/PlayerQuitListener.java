@@ -1,6 +1,6 @@
 package de.drnutella.castigo.listener;
 
-import de.drnutella.castigo.manager.UserManager;
+import de.drnutella.castigo.data.CacheManager;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -11,7 +11,7 @@ public class PlayerQuitListener implements Listener {
     @EventHandler
     public void playerQuit(PlayerDisconnectEvent event){
         final ProxiedPlayer player = event.getPlayer();
-        UserManager.uuidCache.remove(player.getName());
+        CacheManager.uuidCache.remove(player.getName());
     }
 
 }

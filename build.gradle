@@ -7,6 +7,10 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+
+    flatDir {
+        dirs '../ProxyCore/build/libs'
+    }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 
     maven {
@@ -20,9 +24,12 @@ dependencies {
     implementation 'com.zaxxer:HikariCP:5.0.1' // Version von HikariCP
 
     implementation 'com.mojang:authlib:1.5.25'
+    compileOnly name: 'ProxyCore-API-1.0-SNAPSHOT'
+
 
 // https://mvnrepository.com/artifact/net.md-5/bungeecord-api
     compileOnly 'net.md-5:bungeecord-api:1.20-R0.2'
+
 }
 
 jar {
@@ -44,7 +51,7 @@ task buildAPI(type: Jar) {
             'de/drnutella/castigo/commands/**',
             'de/drnutella/castigo/events/**',
             'de/drnutella/castigo/listener/**',
-            'de/drnutella/castigo/UserManager/**'
+            'de/drnutella/castigo/utils/**',
     ]
 
     from {

@@ -7,6 +7,8 @@ import de.drnutella.castigo.enums.PunishType;
 import de.drnutella.castigo.events.PunishExecutedEvent;
 import de.drnutella.castigo.exceptions.PunishActionFaildException;
 import de.drnutella.castigo.objects.Punish;
+import de.drnutella.proxycore.data.implementation.UserBasicInformationService;
+import de.drnutella.proxycore.objects.CustomProxyPlayer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
@@ -43,10 +45,10 @@ public class CustomPunishCommand extends Command {
             long banTime;
             boolean isPerma;
 
-            if(args[1].equalsIgnoreCase("perma")){
+            if (args[1].equalsIgnoreCase("perma")) {
                 banTime = 0;
                 isPerma = true;
-            }else {
+            } else {
                 isPerma = false;
                 StringBuilder timeBuilder = new StringBuilder();
                 for (int i = 1; i < args.length; i++) {
@@ -83,9 +85,7 @@ public class CustomPunishCommand extends Command {
                 reason = "";
             }
 
-            Castigo.getUserDatabaseManager().getUUIDFromUserName(args[0], uuidFeedback -> {
-                UUID userUUID;
-
+            UserBasicInformationService.getUUIDFromUserName(args[0], uuidFeedback ->{
                 if (uuidFeedback == null) {
                     try {
                         throw new PunishActionFaildException(PunishFeedback.USER_NOT_EXSIST);
@@ -94,8 +94,6 @@ public class CustomPunishCommand extends Command {
                         return;
                     }
                 }
-
-                userUUID = uuidFeedback;
 
                 UUID staffUUID;
 
@@ -107,7 +105,7 @@ public class CustomPunishCommand extends Command {
 
                 Castigo.getInstance().getProxy().getPluginManager().callEvent(new PunishExecutedEvent(
                         new Punish(
-                                userUUID,
+                                uuidFeedback,
                                 staffUUID,
                                 punishRegion,
                                 PunishType.CustomPunish,

@@ -1,4 +1,4 @@
-package de.drnutella.castigo.mysql;
+package de.drnutella.castigo.data;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

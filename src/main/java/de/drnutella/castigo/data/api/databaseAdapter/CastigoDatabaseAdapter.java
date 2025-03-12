@@ -1,45 +1,25 @@
-package de.drnutella.castigo.mysql.api;
+package de.drnutella.castigo.data.api.databaseAdapter;
 
 
 import de.drnutella.castigo.Castigo;
-import de.drnutella.castigo.mysql.MySQL;
 import de.drnutella.castigo.utils.JSONFileBuilder;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DatabaseManager {
+public class CastigoDatabaseAdapter extends DatabaseAdapter {
 
-    private final MySQL mySQL = Castigo.getMySQL();
+    public CastigoDatabaseAdapter() {
+        super(Castigo.getMySQL());
+    }
+
     private final JSONFileBuilder mySQLJSONHandler = Castigo.getMysqlJSONHandler();
     private final Boolean areTablesCreated = mySQLJSONHandler.getBooleanFromFile("Tables-Created");
 
     public void createDefaultTables() {
         if (!areTablesCreated) {
-            createUserTable();
             createPunishmentTable();
             mySQLJSONHandler.setBooleanToFile("Tables-Created", true);
-        }
-    }
-
-    private void createUserTable() {
-        try {
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(
-                    "CREATE TABLE IF NOT EXSIST `castigo`.`user` (" +
-                    "  `uuid` CHAR(36) NOT NULL," +
-                    "  `username` VARCHAR(16) NOT NULL," +
-                    "  `lastLogin` TIMESTAMP NOT NULL," +
-                    "  PRIMARY KEY (`uuid`));"
-            );
-
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-            Castigo.getInstance().getLogger().info("[Castigo] `castigo`.`user` Table erfolgreich erstellt!");
-
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-            Castigo.getInstance().getLogger().info("[Castigo] FEHLER BEI `castigo`.`user` Table ERSTELLUNG!");
-
         }
     }
 

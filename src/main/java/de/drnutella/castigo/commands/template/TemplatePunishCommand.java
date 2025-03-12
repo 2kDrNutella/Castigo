@@ -1,6 +1,7 @@
 package de.drnutella.castigo.commands.template;
 
 import de.drnutella.castigo.Castigo;
+import de.drnutella.castigo.data.api.implementation.PunishService;
 import de.drnutella.castigo.enums.PunishFeedback;
 import de.drnutella.castigo.enums.PunishRegion;
 import de.drnutella.castigo.enums.PunishType;
@@ -8,7 +9,9 @@ import de.drnutella.castigo.events.PunishExecutedEvent;
 import de.drnutella.castigo.exceptions.PunishActionFaildException;
 import de.drnutella.castigo.objects.Punish;
 import de.drnutella.castigo.utils.TemplateConverter;
-import de.drnutella.castigo.utils.TimeCalculator;
+import de.drnutella.proxycore.data.implementation.UserBasicInformationService;
+import de.drnutella.proxycore.objects.CustomProxyPlayer;
+import de.drnutella.proxycore.utils.TimeCalculator;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
@@ -37,10 +40,7 @@ public class TemplatePunishCommand extends Command {
     public void execute(CommandSender commandSender, String[] args) {
         if (commandSender.hasPermission(getPermission())) {
             if (args.length == 2) {
-
-                Castigo.getUserDatabaseManager().getUUIDFromUserName(args[0], uuidFeedback -> {
-                    UUID userUUID;
-
+                UserBasicInformationService.getUUIDFromUserName(args[0], uuidFeedback ->{
                     if (uuidFeedback == null) {
                         try {
                             throw new PunishActionFaildException(PunishFeedback.USER_NOT_EXSIST);
@@ -49,8 +49,6 @@ public class TemplatePunishCommand extends Command {
                             return;
                         }
                     }
-
-                    userUUID = uuidFeedback;
 
                     UUID staffUUID;
                     final String template = args[1].toUpperCase();
@@ -62,7 +60,7 @@ public class TemplatePunishCommand extends Command {
                     }
 
                     //lädt die Anzahl der Bestrafungen für ein Template aus der Datenbank
-                    Castigo.getPunishDatabaseManager().getReasonCount(userUUID, template, punishRegion, PunishType.TemplatePunish, result -> {
+                    PunishService.getReasonCount(uuidFeedback, template, punishRegion, PunishType.TemplatePunish, result -> {
                         long banTime;
                         ArrayList<String> durationArray;
 
@@ -109,7 +107,7 @@ public class TemplatePunishCommand extends Command {
 
                         Castigo.getInstance().getProxy().getPluginManager().callEvent(new PunishExecutedEvent(
                                 new Punish(
-                                        userUUID,
+                                        uuidFeedback,
                                         staffUUID,
                                         punishRegion,
                                         PunishType.TemplatePunish,

@@ -50,6 +50,14 @@ public class PunishInfo {
         return target;
     }
 
+    public Long remainingTimeMillis() {
+        return punishedUntil - System.currentTimeMillis();
+    }
+
+    public Long originalTimeMillis() {
+        return punishedUntil() - punishedFrom() + 1;
+    }
+
     public Boolean isActive(){
         if(!isUnbanned){
             if(!isPerma){

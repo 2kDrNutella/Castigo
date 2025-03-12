@@ -1,10 +1,9 @@
-package de.drnutella.castigo.mysql.api.punish;
+package de.drnutella.castigo.data.api.dataAdapter;
 
+import de.drnutella.castigo.data.CacheManager;
 import de.drnutella.castigo.enums.PunishFeedback;
 import de.drnutella.castigo.enums.PunishRegion;
 import de.drnutella.castigo.enums.PunishType;
-import de.drnutella.castigo.manager.UserManager;
-import de.drnutella.castigo.mysql.MySQL;
 import de.drnutella.castigo.objects.Punish;
 import de.drnutella.castigo.objects.PunishInfo;
 import de.drnutella.castigo.objects.PunishInfoContainer;
@@ -14,26 +13,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class PunishDataAdapter {
+public class PunishDataAdapter extends DataAdapter {
 
-    private final ExecutorService executorService;
-    private final MySQL mysql;
-    private ResultSet resultSet;
-
-    public PunishDataAdapter(ExecutorService executorService, MySQL mySQL) {
-        this.executorService = executorService;
-        this.mysql = mySQL;
-    }
+    static ResultSet resultSet;
 
     /*
         Database returns feedback with Coulmn 'feedback':
         - ALLREADY PUNISHED
         - SUCCESS
      */
-    public void punishPlayer(Punish punish, Consumer<PunishFeedback> callback) {
+    protected static void punishPlayerSQL(Punish punish, Consumer<PunishFeedback> callback) {
         executorService.submit(() -> {
             PunishFeedback feedback;
             try (final Connection connection = mysql.getConnection()) {
@@ -88,7 +79,7 @@ public class PunishDataAdapter {
         - NOT PUNISHED
         - SUCCESS
      */
-    public void unpunishPlayer(UUID uuid, PunishRegion punishRegion, Consumer<PunishFeedback> callback) {
+    protected static void unpunishPlayerSQL(UUID uuid, PunishRegion punishRegion, Consumer<PunishFeedback> callback) {
         executorService.submit(() -> {
             PunishFeedback feedback;
             try (final Connection connection = mysql.getConnection()) {
@@ -124,7 +115,7 @@ public class PunishDataAdapter {
     /*
         Database returns Amount with Coulmn 'amount':
      */
-    public void getReasonCount(UUID uuid, String template, PunishRegion region, PunishType punishType, Consumer<Integer> callback) {
+    protected static void getReasonCountSQL(UUID uuid, String template, PunishRegion region, PunishType punishType, Consumer<Integer> callback) {
         executorService.submit(() -> {
             int result;
             try (final Connection connection = mysql.getConnection()) {
@@ -164,65 +155,60 @@ public class PunishDataAdapter {
 
     /*
      */
-    public void loadPunishInfoContainer(UUID uuid, Consumer<PunishInfoContainer> callback) {
-        if (UserManager.punishInfoContainerCache.containsKey(uuid)) {
-            callback.accept(UserManager.punishInfoContainerCache.get(uuid));
-        } else {
-            executorService.submit(() -> {
-                PunishInfoContainer feedback = null;
-                try (final Connection connection = mysql.getConnection()) {
+    protected static void loadPunishInfoContainerSQL(UUID uuid, Consumer<PunishInfoContainer> callback) {
+        executorService.submit(() -> {
+            PunishInfoContainer feedback = null;
+            try (final Connection connection = mysql.getConnection()) {
 
-                    final PreparedStatement preparedStatement = connection.prepareStatement("call getLatestPunishs(?);");
+                final PreparedStatement preparedStatement = connection.prepareStatement("call getLatestPunishs(?);");
 
-                    preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setString(1, uuid.toString());
 
-                    resultSet = preparedStatement.executeQuery();
+                resultSet = preparedStatement.executeQuery();
 
-                    PunishInfo lastChatPunish = null;
-                    PunishInfo lastNetworkPunish = null;
+                PunishInfo lastChatPunish = null;
+                PunishInfo lastNetworkPunish = null;
 
-                    boolean isPerma;
-                    boolean isUnbanned;
+                boolean isPerma;
+                boolean isUnbanned;
 
-                    while (resultSet.next()) {
-                        if (resultSet.getString("region").equals("CHAT")) {
+                while (resultSet.next()) {
+                    if (resultSet.getString("region").equals("CHAT")) {
 
-                            isPerma = (resultSet.getInt("isPerma") == 1);
-                            isUnbanned = (resultSet.getInt("isUnbanned") == 1);
+                        isPerma = (resultSet.getInt("isPerma") == 1);
+                        isUnbanned = (resultSet.getInt("isUnbanned") == 1);
 
-                            lastChatPunish = new PunishInfo(
-                                    UUID.fromString(resultSet.getString("uuid")),
-                                    PunishRegion.CHAT,
-                                    resultSet.getString("reason"),
-                                    isPerma,
-                                    resultSet.getLong("punishedFrom"),
-                                    resultSet.getLong("punishedUntil"),
-                                    isUnbanned
-                            );
-                        } else { //must be network
-                            isPerma = (resultSet.getInt("isPerma") == 1);
-                            isUnbanned = (resultSet.getInt("isUnbanned") == 1);
+                        lastChatPunish = new PunishInfo(
+                                UUID.fromString(resultSet.getString("uuid")),
+                                PunishRegion.CHAT,
+                                resultSet.getString("reason"),
+                                isPerma,
+                                resultSet.getLong("punishedFrom"),
+                                resultSet.getLong("punishedUntil"),
+                                isUnbanned
+                        );
+                    } else { //must be network
+                        isPerma = (resultSet.getInt("isPerma") == 1);
+                        isUnbanned = (resultSet.getInt("isUnbanned") == 1);
 
-                            lastNetworkPunish = new PunishInfo(
-                                    UUID.fromString(resultSet.getString("uuid")),
-                                    PunishRegion.NETWORK,
-                                    resultSet.getString("reason"),
-                                    isPerma,
-                                    resultSet.getLong("punishedFrom"),
-                                    resultSet.getLong("punishedUntil"),
-                                    isUnbanned
-                            );
-                        }
-                        PunishInfoContainer punishInfoContainer = new PunishInfoContainer(lastChatPunish, lastNetworkPunish);
-                        feedback = punishInfoContainer;
-                        UserManager.punishInfoContainerCache.put(uuid, punishInfoContainer);
+                        lastNetworkPunish = new PunishInfo(
+                                UUID.fromString(resultSet.getString("uuid")),
+                                PunishRegion.NETWORK,
+                                resultSet.getString("reason"),
+                                isPerma,
+                                resultSet.getLong("punishedFrom"),
+                                resultSet.getLong("punishedUntil"),
+                                isUnbanned
+                        );
                     }
-
-                } catch (SQLException ignored) {
-                    feedback = null;
+                    resultSet.close();
+                    feedback = new PunishInfoContainer(lastChatPunish, lastNetworkPunish);
                 }
-                callback.accept(feedback);
-            });
-        }
+
+            } catch (SQLException ignored) {
+                feedback = null;
+            }
+            callback.accept(feedback);
+        });
     }
 }

@@ -4,17 +4,18 @@ import de.drnutella.castigo.commands.CustomPunishCommand;
 import de.drnutella.castigo.commands.template.TemplateListCommand;
 import de.drnutella.castigo.commands.template.TemplatePunishCommand;
 import de.drnutella.castigo.commands.UnPunishCommand;
+import de.drnutella.castigo.data.DatabaseManager;
 import de.drnutella.castigo.listener.PlayerChatListener;
 import de.drnutella.castigo.listener.PlayerJoinListener;
 import de.drnutella.castigo.listener.PlayerQuitListener;
-import de.drnutella.castigo.mysql.MySQL;
-import de.drnutella.castigo.mysql.api.DatabaseManager;
-import de.drnutella.castigo.mysql.api.punish.PunishDataAdapter;
-import de.drnutella.castigo.mysql.api.user.UserDataAdapter;
+import de.drnutella.castigo.data.MySQL;
+import de.drnutella.castigo.data.api.databaseAdapter.CastigoDatabaseAdapter;
+import de.drnutella.castigo.data.api.dataAdapter.PunishDataAdapter;
 import de.drnutella.castigo.utils.JSONFileBuilder;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 
+import javax.xml.crypto.Data;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,8 +26,7 @@ public class Castigo extends Plugin {
     static final int NETTY_PORT = 25500;
 
     static ExecutorService executorService;
-    static DatabaseManager databaseManager;
-    static UserDataAdapter userDataAdapter;
+    static CastigoDatabaseAdapter castigoDatabaseAdapter;
     static PunishDataAdapter punishDataAdapter;
 
     final PluginManager pluginManager = getProxy().getPluginManager();
@@ -57,11 +57,9 @@ public class Castigo extends Plugin {
     }
 
     void loadDatabase() {
-        databaseManager = new DatabaseManager();
-        databaseManager.createDefaultTables();
+        DatabaseManager.castigoDatabaseAdapter.createDefaultTables();
 
-        userDataAdapter = new UserDataAdapter(executorService, mySQL);
-        punishDataAdapter = new PunishDataAdapter(executorService, mySQL);
+        punishDataAdapter = new PunishDataAdapter();
     }
 
     void fileCreation() {
@@ -174,10 +172,6 @@ public class Castigo extends Plugin {
 
     public static ExecutorService getOwnExecutorService() {
         return executorService;
-    }
-
-    public static UserDataAdapter getUserDatabaseManager() {
-        return userDataAdapter;
     }
 
     public static PunishDataAdapter getPunishDatabaseManager() {

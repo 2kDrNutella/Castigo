@@ -1,10 +1,12 @@
 package de.drnutella.castigo.commands;
 
-import de.drnutella.castigo.Castigo;
+import de.drnutella.castigo.data.CacheManager;
+import de.drnutella.castigo.data.api.implementation.PunishService;
 import de.drnutella.castigo.enums.PunishFeedback;
 import de.drnutella.castigo.enums.PunishRegion;
 import de.drnutella.castigo.exceptions.PunishActionFaildException;
-import de.drnutella.castigo.manager.UserManager;
+import de.drnutella.proxycore.data.implementation.UserBasicInformationService;
+import de.drnutella.proxycore.objects.CustomProxyPlayer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -31,9 +33,7 @@ public class UnPunishCommand extends Command {
     public void execute(CommandSender commandSender, String[] args) {
         if (commandSender.hasPermission(getPermission())) {
             if (args.length == 1) {
-                Castigo.getUserDatabaseManager().getUUIDFromUserName(args[0], uuidFeedback -> {
-                    UUID userUUID;
-
+                UserBasicInformationService.getUUIDFromUserName(args[0], uuidFeedback ->{
                     if (uuidFeedback == null) {
                         try {
                             throw new PunishActionFaildException(PunishFeedback.USER_NOT_EXSIST);
@@ -43,12 +43,10 @@ public class UnPunishCommand extends Command {
                         }
                     }
 
-                    userUUID = uuidFeedback;
-
-                    Castigo.getPunishDatabaseManager().unpunishPlayer(userUUID, punishRegion, punishFeedback -> {
+                    PunishService.unpunishPlayer(uuidFeedback, punishRegion, punishFeedback -> {
                         commandSender.sendMessage(punishFeedback.reason());
 
-                        UserManager.punishInfoContainerCache.remove(userUUID); // remove cached Ban Infos
+                        CacheManager.punishInfoContainerCache.remove(uuidFeedback); // remove cached Ban Infos
 
                     });
                 });
